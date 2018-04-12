@@ -1,0 +1,12 @@
+flags: {}
+packages:
+- hgmp
+- qftinads
+- rounded
+# - simple
+system-ghc: true
+allow-newer: true
+extra-deps: []
+resolver: lts-10.8
+ghc-options:
+  $locals : -O2

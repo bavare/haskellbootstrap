@@ -1,0 +1,375 @@
+================================================================================
+
+main = showarr (take 100 $ numeratorpolys00 50 :: [Poly PFloat])
+
+  37,168,953,280 bytes allocated in the heap
+   9,294,559,048 bytes copied during GC
+     397,115,872 bytes maximum residency (86 sample(s))
+       1,183,264 bytes maximum slop
+            1087 MB total memory in use (0 MB lost due to fragmentation)
+
+                                     Tot time (elapsed)  Avg pause  Max pause
+  Gen  0     35842 colls,     0 par    9.149s   9.933s     0.0003s    0.3673s
+  Gen  1        86 colls,     0 par    0.014s   0.015s     0.0002s    0.0021s
+
+  TASKS: 4 (1 bound, 3 peak workers (3 total), using -N1)
+
+  SPARKS: 0 (0 converted, 0 overflowed, 0 dud, 0 GC'd, 0 fizzled)
+
+  INIT    time    0.001s  (  0.003s elapsed)
+  MUT     time   17.928s  ( 18.300s elapsed)
+  GC      time    9.163s  (  9.949s elapsed)
+  EXIT    time    0.000s  (  0.011s elapsed)
+  Total   time   27.092s  ( 28.263s elapsed)
+
+  Alloc rate    2,073,181,131 bytes per MUT second
+
+  Productivity  66.2% of total user, 64.8% of total elapsed
+
+gc_alloc_block_sync: 0
+whitehole_spin: 0
+gen[0].sync: 0
+gen[1].sync: 0
+
+================================================================================
+
+main = showarr (take 200 $ numeratordiffs00 100 :: [Poly PFloat])
+
+
+  8,731,937,408 bytes allocated in the heap
+   1,833,797,784 bytes copied during GC
+     108,676,400 bytes maximum residency (23 sample(s))
+         342,736 bytes maximum slop
+             315 MB total memory in use (0 MB lost due to fragmentation)
+
+                                     Tot time (elapsed)  Avg pause  Max pause
+  Gen  0      8401 colls,     0 par    3.410s   3.648s     0.0004s    0.2578s
+  Gen  1        23 colls,     0 par    0.007s   0.008s     0.0003s    0.0026s
+
+  TASKS: 4 (1 bound, 3 peak workers (3 total), using -N1)
+
+  SPARKS: 0 (0 converted, 0 overflowed, 0 dud, 0 GC'd, 0 fizzled)
+
+  INIT    time    0.001s  (  0.003s elapsed)
+  MUT     time    5.319s  (  5.586s elapsed)
+  GC      time    3.417s  (  3.655s elapsed)
+  EXIT    time    0.002s  (  0.032s elapsed)
+  Total   time    8.739s  (  9.277s elapsed)
+
+  Alloc rate    1,641,502,991 bytes per MUT second
+
+  Productivity  60.9% of total user, 60.6% of total elapsed
+
+gc_alloc_block_sync: 0
+whitehole_spin: 0
+gen[0].sync: 0
+gen[1].sync: 0
+
+================================================================================
+
+main = showarr (take 150 rhotoz :: [[PFloat]])
+
+
+  31,114,321,848 bytes allocated in the heap
+   8,299,441,400 bytes copied during GC
+   1,145,940,912 bytes maximum residency (24 sample(s))
+       3,064,912 bytes maximum slop
+            2731 MB total memory in use (0 MB lost due to fragmentation)
+
+                                     Tot time (elapsed)  Avg pause  Max pause
+  Gen  0     30004 colls,     0 par   10.323s  14.990s     0.0005s    4.7800s
+  Gen  1        24 colls,     0 par    0.004s   0.004s     0.0002s    0.0004s
+
+  TASKS: 4 (1 bound, 3 peak workers (3 total), using -N1)
+
+  SPARKS: 0 (0 converted, 0 overflowed, 0 dud, 0 GC'd, 0 fizzled)
+
+  INIT    time    0.001s  (  0.003s elapsed)
+  MUT     time   16.106s  ( 17.232s elapsed)
+  GC      time   10.327s  ( 14.994s elapsed)
+  EXIT    time    0.032s  (  0.384s elapsed)
+  Total   time   26.466s  ( 32.614s elapsed)
+
+  Alloc rate    1,931,831,158 bytes per MUT second
+
+  Productivity  61.0% of total user, 54.0% of total elapsed
+
+gc_alloc_block_sync: 0
+whitehole_spin: 0
+gen[0].sync: 0
+gen[1].sync: 0
+
+
+================================================================================
+Improved rhotoz (from rhotoz')
+================================================================================
+
+main = showarr (take 150 rhotoz :: [[PFloat]])
+
+   4,893,010,128 bytes allocated in the heap
+   1,154,891,624 bytes copied during GC
+     147,437,232 bytes maximum residency (22 sample(s))
+         432,464 bytes maximum slop
+             356 MB total memory in use (0 MB lost due to fragmentation)
+
+                                     Tot time (elapsed)  Avg pause  Max pause
+  Gen  0      4705 colls,     0 par    1.734s   2.329s     0.0005s    0.4435s
+  Gen  1        22 colls,     0 par    0.004s   0.008s     0.0003s    0.0035s
+
+  TASKS: 4 (1 bound, 3 peak workers (3 total), using -N1)
+
+  SPARKS: 0 (0 converted, 0 overflowed, 0 dud, 0 GC'd, 0 fizzled)
+
+  INIT    time    0.001s  (  0.016s elapsed)
+  MUT     time    3.268s  (  3.637s elapsed)
+  GC      time    1.738s  (  2.337s elapsed)
+  EXIT    time    0.005s  (  0.040s elapsed)
+  Total   time    5.011s  (  6.030s elapsed)
+
+  Alloc rate    1,497,278,443 bytes per MUT second
+
+  Productivity  65.3% of total user, 61.0% of total elapsed
+
+gc_alloc_block_sync: 0
+whitehole_spin: 0
+gen[0].sync: 0
+gen[1].sync: 0
+
+
+================================================================================
+
+main = showarr (take 200 rhotoz :: [[PFloat]])
+
+  11,257,596,248 bytes allocated in the heap
+   2,779,307,432 bytes copied during GC
+     364,633,288 bytes maximum residency (25 sample(s))
+         959,288 bytes maximum slop
+             878 MB total memory in use (0 MB lost due to fragmentation)
+
+                                     Tot time (elapsed)  Avg pause  Max pause
+  Gen  0     10850 colls,     0 par    3.523s   4.471s     0.0004s    0.7354s
+  Gen  1        25 colls,     0 par    0.004s   0.005s     0.0002s    0.0013s
+
+  TASKS: 4 (1 bound, 3 peak workers (3 total), using -N1)
+
+  SPARKS: 0 (0 converted, 0 overflowed, 0 dud, 0 GC'd, 0 fizzled)
+
+  INIT    time    0.001s  (  0.014s elapsed)
+  MUT     time    5.774s  (  6.141s elapsed)
+  GC      time    3.527s  (  4.476s elapsed)
+  EXIT    time    0.009s  (  0.094s elapsed)
+  Total   time    9.311s  ( 10.726s elapsed)
+
+  Alloc rate    1,949,580,334 bytes per MUT second
+
+  Productivity  62.1% of total user, 58.1% of total elapsed
+
+gc_alloc_block_sync: 0
+whitehole_spin: 0
+gen[0].sync: 0
+gen[1].sync: 0
+
+================================================================================
+
+main = showarr (take 100 $ numeratorpolys00 50 :: [Poly PFloat])
+
+  30,376,932,344 bytes allocated in the heap
+   7,523,933,872 bytes copied during GC
+      91,488,336 bytes maximum residency (159 sample(s))
+         325,856 bytes maximum slop
+             266 MB total memory in use (0 MB lost due to fragmentation)
+
+                                     Tot time (elapsed)  Avg pause  Max pause
+  Gen  0     29202 colls,     0 par    9.349s  11.089s     0.0004s    0.1550s
+  Gen  1       159 colls,     0 par    0.032s   0.036s     0.0002s    0.0033s
+
+  TASKS: 4 (1 bound, 3 peak workers (3 total), using -N1)
+
+  SPARKS: 0 (0 converted, 0 overflowed, 0 dud, 0 GC'd, 0 fizzled)
+
+  INIT    time    0.001s  (  0.003s elapsed)
+  MUT     time   19.415s  ( 22.490s elapsed)
+  GC      time    9.382s  ( 11.125s elapsed)
+  EXIT    time    0.000s  (  0.009s elapsed)
+  Total   time   28.797s  ( 33.626s elapsed)
+
+  Alloc rate    1,564,645,996 bytes per MUT second
+
+  Productivity  67.4% of total user, 66.9% of total elapsed
+
+gc_alloc_block_sync: 0
+whitehole_spin: 0
+gen[0].sync: 0
+gen[1].sync: 0
+
+================================================================================
+
+main = showarr (take 150 $ numeratorpolys00 50 :: [Poly PFloat])
+
+ 102,613,049,128 bytes allocated in the heap
+  25,931,895,056 bytes copied during GC
+     302,387,856 bytes maximum residency (253 sample(s))
+         912,752 bytes maximum slop
+             856 MB total memory in use (0 MB lost due to fragmentation)
+
+                                     Tot time (elapsed)  Avg pause  Max pause
+  Gen  0     98955 colls,     0 par   27.357s  30.598s     0.0003s    0.3864s
+  Gen  1       253 colls,     0 par    0.040s   0.043s     0.0002s    0.0022s
+
+  TASKS: 4 (1 bound, 3 peak workers (3 total), using -N1)
+
+  SPARKS: 0 (0 converted, 0 overflowed, 0 dud, 0 GC'd, 0 fizzled)
+
+  INIT    time    0.001s  (  0.011s elapsed)
+  MUT     time   57.729s  ( 62.943s elapsed)
+  GC      time   27.398s  ( 30.641s elapsed)
+  EXIT    time    0.000s  (  0.009s elapsed)
+  Total   time   85.128s  ( 93.604s elapsed)
+
+  Alloc rate    1,777,485,690 bytes per MUT second
+
+  Productivity  67.8% of total user, 67.3% of total elapsed
+
+gc_alloc_block_sync: 0
+whitehole_spin: 0
+gen[0].sync: 0
+gen[1].sync: 0
+
+================================================================================
+
+  <rhoOrder>50</rhoOrder>
+  <derOrder>50</derOrder>
+
+  57,905,612,944 bytes allocated in the heap
+  12,382,017,808 bytes copied during GC
+     110,926,824 bytes maximum residency (1353 sample(s))
+         386,072 bytes maximum slop
+             320 MB total memory in use (0 MB lost due to fragmentation)
+
+                                     Tot time (elapsed)  Avg pause  Max pause
+  Gen  0     54077 colls,     0 par   12.058s  12.562s     0.0002s    0.1035s
+  Gen  1      1353 colls,     0 par    0.151s   0.156s     0.0001s    0.0017s
+
+  TASKS: 4 (1 bound, 3 peak workers (3 total), using -N1)
+
+  SPARKS: 0 (0 converted, 0 overflowed, 0 dud, 0 GC'd, 0 fizzled)
+
+  INIT    time    0.001s  (  0.005s elapsed)
+  MUT     time   28.446s  ( 31.629s elapsed)
+  GC      time   12.209s  ( 12.718s elapsed)
+  EXIT    time   -0.000s  (  0.011s elapsed)
+  Total   time   40.655s  ( 44.364s elapsed)
+
+  Alloc rate    2,035,668,447 bytes per MUT second
+
+  Productivity  70.0% of total user, 71.3% of total elapsed
+
+gc_alloc_block_sync: 0
+whitehole_spin: 0
+gen[0].sync: 0
+gen[1].sync: 0
+
+================================================================================
+
+  <rhoOrder>50</rhoOrder>
+  <derOrder>75</derOrder>
+
+ 203,264,259,152 bytes allocated in the heap
+  45,245,655,600 bytes copied during GC
+     332,625,632 bytes maximum residency (2717 sample(s))
+       1,022,240 bytes maximum slop
+             969 MB total memory in use (0 MB lost due to fragmentation)
+
+                                     Tot time (elapsed)  Avg pause  Max pause
+  Gen  0     192720 colls,     0 par   47.015s  52.343s     0.0003s    0.4469s
+  Gen  1      2717 colls,     0 par    0.336s   0.369s     0.0001s    0.0041s
+
+  TASKS: 4 (1 bound, 3 peak workers (3 total), using -N1)
+
+  SPARKS: 0 (0 converted, 0 overflowed, 0 dud, 0 GC'd, 0 fizzled)
+
+  INIT    time    0.001s  (  0.003s elapsed)
+  MUT     time  112.676s  (128.943s elapsed)
+  GC      time   47.352s  ( 52.712s elapsed)
+  EXIT    time    0.000s  (  0.001s elapsed)
+  Total   time  160.029s  (181.659s elapsed)
+
+  Alloc rate    1,803,970,193 bytes per MUT second
+
+  Productivity  70.4% of total user, 71.0% of total elapsed
+
+gc_alloc_block_sync: 0
+whitehole_spin: 0
+gen[0].sync: 0
+gen[1].sync: 0
+
+================================================================================
+
+  <rhoOrder>50</rhoOrder>
+  <derOrder>100</derOrder>
+
+
+ 521,666,205,392 bytes allocated in the heap
+ 117,896,608,704 bytes copied during GC
+     785,026,680 bytes maximum residency (4482 sample(s))
+       2,195,848 bytes maximum slop
+            2261 MB total memory in use (0 MB lost due to fragmentation)
+
+                                     Tot time (elapsed)  Avg pause  Max pause
+  Gen  0     498139 colls,     0 par   126.920s  143.987s     0.0003s    1.6954s
+  Gen  1      4482 colls,     0 par    0.536s   0.569s     0.0001s    0.0018s
+
+  TASKS: 4 (1 bound, 3 peak workers (3 total), using -N1)
+
+  SPARKS: 0 (0 converted, 0 overflowed, 0 dud, 0 GC'd, 0 fizzled)
+
+  INIT    time    0.001s  (  0.009s elapsed)
+  MUT     time  304.451s  (342.847s elapsed)
+  GC      time  127.456s  (144.556s elapsed)
+  EXIT    time    0.000s  (  0.004s elapsed)
+  Total   time  431.909s  (487.416s elapsed)
+
+  Alloc rate    1,713,463,026 bytes per MUT second
+
+  Productivity  70.5% of total user, 70.3% of total elapsed
+
+gc_alloc_block_sync: 0
+whitehole_spin: 0
+gen[0].sync: 0
+gen[1].sync: 0
+
+================================================================================
+
+  <rhoOrder>50</rhoOrder>
+  <derOrder>100</derOrder>
+  no normalization
+
+
+ 520,308,003,928 bytes allocated in the heap
+ 117,452,059,736 bytes copied during GC
+     658,491,728 bytes maximum residency (5694 sample(s))
+       1,852,656 bytes maximum slop
+            1916 MB total memory in use (0 MB lost due to fragmentation)
+
+                                     Tot time (elapsed)  Avg pause  Max pause
+  Gen  0     496060 colls,     0 par   122.900s  139.255s     0.0003s    2.5153s
+  Gen  1      5694 colls,     0 par    0.690s   0.751s     0.0001s    0.0051s
+
+  TASKS: 4 (1 bound, 3 peak workers (3 total), using -N1)
+
+  SPARKS: 0 (0 converted, 0 overflowed, 0 dud, 0 GC'd, 0 fizzled)
+
+  INIT    time    0.001s  (  0.003s elapsed)
+  MUT     time  284.950s  (316.987s elapsed)
+  GC      time  123.591s  (140.006s elapsed)
+  EXIT    time    0.000s  (  0.003s elapsed)
+  Total   time  408.542s  (456.999s elapsed)
+
+  Alloc rate    1,825,961,521 bytes per MUT second
+
+  Productivity  69.7% of total user, 69.4% of total elapsed
+
+gc_alloc_block_sync: 0
+whitehole_spin: 0
+gen[0].sync: 0
+gen[1].sync: 0

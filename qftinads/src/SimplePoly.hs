@@ -12,6 +12,7 @@ module SimplePoly
   , shiftPoly
   , sampsToPoly
   , diffPoly
+  , multarg
   ) where
 
 import GHC.Generics (Generic)
@@ -110,3 +111,7 @@ sampsToPoly ((arg,val):samps) = let valP = constP val
 -- if q = shiftpoly 3 p then q(x) = p(x+3), so if p(x) > 0 for x > 3 then q(x) > 0 for x > 0
 shiftPoly :: (Num a) => a -> Poly a -> Poly a
 shiftPoly y (CL p) = sum $ zipWith (\c m -> constP c * m) p [ (x + constP y)^n | n <- [0,1..] ]
+
+-- if q = multarg 3 p then q(x) = p(3x)
+multarg :: (Num a) => a -> Poly a -> Poly a
+multarg y (CL p) = CL $ zipWith (*) p [ y^n | n <- [0,1..] ]

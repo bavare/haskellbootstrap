@@ -108,7 +108,7 @@ functionalFns h1 h3 n =
             (1 : repeat 0)
   , g6 = signAlternate $ addfactden $ productrule
             (map constP (diffs (\x -> (-1) * (1-x) ** (2 * auto h3)) (1/2)))
-            npsh31h13
+            npsh31h31
   , den = denominator n
   , h1 = h1
   , h3 = h3
@@ -131,7 +131,35 @@ functionalFns h1 h3 n =
     nps0h13 = numeratorpolys 0 (h1 - h3) n
     nps0h31 = numeratorpolys 0 (h3 - h1) n
     npsh13h31 = numeratorpolys (h1 - h3) (h3 - h1) n
-    npsh31h13 = numeratorpolys (h3 - h1) (h1 - h3) n
+    npsh31h31 = numeratorpolys (h3 - h1) (h3 - h1) n
+
+rescaleat :: (Floating a, Eq a) => a -> InfiniteFunctionalFns a -> InfiniteFunctionalFns a
+rescaleat h fns =
+  Functional
+  { f1 = zipWith (/.) (f1 fns) f1cs
+  , f1Id = zipWith (/) (f1Id fns) f1cs
+  , f2 = zipWith (/.) (f2 fns) f2cs
+  , f2Id = zipWith (/) (f2Id fns) f2cs
+  , f3 = zipWith (/.) (f3 fns) f3cs
+  , f4 = zipWith (/.) (f4 fns) f4cs
+  , f5 = zipWith (/.) (f5 fns) f5cs
+  , f6 = zipWith (/.) (f6 fns) f6cs
+  , f6Id = zipWith (/) (f6Id fns) f6cs
+  , g6 = zipWith (/.) (g6 fns) f6cs
+  , den = den fns
+  , h1 = h1 fns
+  , h3 = h3 fns
+  }
+  where
+    (/.) p x = p * constP (1/x)
+    f1cs = zeroestoones . eval h <$> f1 fns
+    f2cs = zeroestoones . eval h <$> f2 fns
+    f3cs = zeroestoones . eval h <$> f3 fns
+    f4cs = zeroestoones . eval h <$> f4 fns
+    f5cs = zeroestoones . eval h <$> f5 fns
+    f6cs = zeroestoones . eval h <$> f6 fns
+    zeroestoones 0 = 1
+    zeroestoones x = x
 
 functionalFnsSimple :: (Floating a) => a -> RhoOrder -> InfiniteFunctionalFns a
 functionalFnsSimple h1 n =
@@ -362,6 +390,7 @@ maxOPESDPFull113Even rhoOrder derOrder h1 h3 evenGap oddGap rat =
     fn =
       toFunctionalVecs $
       takeNumDer derOrder $
+      rescaleat (2 * h1) $
       functionalFns h1 h3 rhoOrder
     doNormPoly = normalize constP normvec
     doNormVec = normalize id normvec

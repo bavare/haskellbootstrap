@@ -38,12 +38,16 @@ writeXMLpolyVectorMatrix pvm =
        ; writeXML "cols" $ writeXMLnum $ length $ head pvm
        ; writeXML "elements" $
             mapM_ (writeXML "polynomialVector" . writeXMLpolyVector) (concat pvm)
-       ; writeXML "samplePoints" $ writeXMLvec $ laguerreSamplePts (maxDeg + 1) `withTypeOf` [x]
-       ; writeXML "sampleScalings" $ writeXMLvec $ laguerreSampleScals (maxDeg + 1) `withTypeOf` [x]
-       ; writeXML "bilinearBasis" $ writeXMLpolyVector $ take ((maxDeg `quot` 2) + 1) laguerrePolys `withTypeOf` [CL [x]] }
+       ; writeXML "samplePoints" $ writeXMLvec samplePoints
+       ; writeXML "sampleScalings" $ writeXMLvec sampleScalings
+       ; writeXML "bilinearBasis" $ writeXMLpolyVector bilinearBasis }
     where
       x = head $ getCL $ head $ head $ head pvm
       maxDeg = maximum $ deg <$> concat (concat pvm)
+      bilinearBasis = take ((maxDeg `quot` 2) + 1) rescaledlaguerrePolys `withTypeOf` [CL [x]]
+      samplePoints = laguerreSamplePts (maxDeg + 1) `withTypeOf` [x]
+      -- sampleScalings = laguerreSampleScals (maxDeg + 1) `withTypeOf` [x]
+      sampleScalings = naturalSampleScals bilinearBasis samplePoints `withTypeOf` [x]
 
 writeXMLSDP :: (Floating a, Show a) => [a] -> [PolyVectorMatrix a] -> Outputter
 writeXMLSDP optvec pvms =
@@ -80,9 +84,16 @@ laguerrerecursion !k !p !q = ( (2 * kk + 1 - x) * q - kk * p) * den
     kk = fromIntegral k
     den = constP (1 / (fromIntegral k + 1))
 
+rescaledlaguerrePolys :: (Floating a) => [Poly a]
+rescaledlaguerrePolys = multarg 2 <$> laguerrePolys
+
 laguerreSamplePts :: Floating a => Int -> [a]
 laguerreSamplePts n = (\k -> pi^2 * (4 * fi k - 1)^2 / (64 * fi n)) <$> [0..(n-1)]
   where fi = fromIntegral
 
-laguerreSampleScals :: Floating a => Int -> [a]
-laguerreSampleScals n = (exp . negate) <$> laguerreSamplePts n
+-- laguerreSampleScals :: Floating a => Int -> [a]
+-- laguerreSampleScals n = exp . negate <$> laguerreSamplePts n
+
+naturalSampleScals :: Floating a => [Poly a] -> [a] -> [a]
+naturalSampleScals bilinearBasis samplePoints =
+  (\pt -> 1 / sum ((\poly -> eval pt poly ^ 2) <$> bilinearBasis)) <$> samplePoints

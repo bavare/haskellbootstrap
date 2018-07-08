@@ -9,6 +9,7 @@ module Functionals
  , maxOPESDPSimple
  , feasibilitySDPSimple
  , maxOPESDPFull113Even
+ , maxOPESDPFull113Z2
  )
  where
 
@@ -166,7 +167,7 @@ functionalFnsSimple h1 n =
   Functional
   { f1 = onlyOdds $ addfactden $ productrule
             (map constP (diffs (\x -> 2 * (1-x) ** (2 * auto h1)) (1/2)))
-            (numeratorpolys 0 0 n)
+            (numeratorpolys00 n)
   , f1Id = onlyOdds $ addfactdenId $ productrule
             (diffs (\x -> 2 * (1-x) ** (2 * auto h1)) (1/2))
             (1 : repeat 0)
@@ -197,7 +198,6 @@ functionalFnsSimple h1 n =
     addfactden = zipWith (*) (constP <$> inverseFacts)
     addfactdenId =  zipWith (*) inverseFacts
 
-
 takeNumDer :: Int -> InfiniteFunctionalFns a -> FiniteFunctionalFns a
 takeNumDer nd fns =
   fns
@@ -207,6 +207,21 @@ takeNumDer nd fns =
   , f2Id = take nd (f2Id fns)
   , f3 = take (quot nd 2) (f3 fns)
   , f4 = take (quot nd 2) (f4 fns)
+  , f5 = take nd (f5 fns)
+  , f6 = take (quot nd 2) (f6 fns)
+  , f6Id = take (quot nd 2) (f6Id fns)
+  , g6 = take (quot nd 2) (g6 fns)
+  }
+
+takeNumDerZ2 :: Int -> InfiniteFunctionalFns a -> FiniteFunctionalFns a
+takeNumDerZ2 nd fns =
+  fns
+  { f1 = take nd (f1 fns)
+  , f1Id = take nd (f1Id fns)
+  , f2 = take nd (f2 fns)
+  , f2Id = take nd (f2Id fns)
+  , f3 = []
+  , f4 = []
   , f5 = take nd (f5 fns)
   , f6 = take (quot nd 2) (f6 fns)
   , f6Id = take (quot nd 2) (f6Id fns)
@@ -273,6 +288,22 @@ pvmMultiParticlesEven gap fn =
 pvmMultiParticlesOdd :: (Num a) => a -> VectorFunctional a -> PolyVectorMatrix a
 pvmMultiParticlesOdd gap fn =
   MT [[shiftPoly gap <$> zipWith (-) (g6 fn) (f5 fn)]]
+
+-- First 'odd' is parity, second is Z2
+pvmMultiParticlesPoddZodd :: (Num a) => a -> VectorFunctional a -> PolyVectorMatrix a
+pvmMultiParticlesPoddZodd = pvmMultiParticlesOdd
+
+pvmMultiParticlesPevenZodd :: (Num a) => a -> VectorFunctional a -> PolyVectorMatrix a
+pvmMultiParticlesPevenZodd gap fn =
+  MT [[shiftPoly gap <$> zipWith (+) (g6 fn) (f5 fn)]]
+
+pvmMultiParticlesPevenZeven :: (Num a) => a -> VectorFunctional a -> PolyVectorMatrix a
+pvmMultiParticlesPevenZeven gap fn =
+  MT [[f1s , f6s ]
+     ,[f6s , f2s ]]
+  where
+    [f1s,f2s,f6s] =
+      (\f -> shiftPoly gap <$> f fn) <$> [f1,f2,f6]
 
 pvmSingleParticlesBound :: (Fractional a, Num a) => VectorFunctional a -> PolyVectorMatrix a
 pvmSingleParticlesBound fn =
@@ -390,6 +421,23 @@ maxOPESDPFull113Even rhoOrder derOrder h1 h3 evenGap oddGap rat =
     fn =
       toFunctionalVecs $
       takeNumDer derOrder $
+      rescaleat (2 * h1) $
+      functionalFns h1 h3 rhoOrder
+    doNormPoly = normalize constP normvec
+    doNormVec = normalize id normvec
+    normvec = singleParticlesOptEven fn rat
+
+maxOPESDPFull113Z2 :: (Ord a, Floating a) => RhoOrder -> Int -> a -> a -> a -> a -> a -> a -> SDP a
+maxOPESDPFull113Z2 rhoOrder derOrder h1 h3 gapPevenZeven gapPevenZodd gapPoddZodd rat =
+  SDP { pvms = [ doNormPoly <$> pvmMultiParticlesPevenZeven gapPevenZeven fn,
+                 doNormPoly <$> pvmMultiParticlesPevenZodd gapPevenZodd fn,
+                 doNormPoly <$> pvmMultiParticlesPoddZodd gapPoddZodd fn ]
+      , optvec = doNormVec $ vecIdMult fn
+      }
+  where
+    fn =
+      toFunctionalVecs $
+      takeNumDerZ2 derOrder $
       rescaleat (2 * h1) $
       functionalFns h1 h3 rhoOrder
     doNormPoly = normalize constP normvec

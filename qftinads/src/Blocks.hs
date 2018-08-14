@@ -4,6 +4,8 @@ module Blocks
     -- , blockval
     -- ,
     RhoOrder
+    , diffsblock00
+    , diffsblock
     , numeratorpolys00
     , numeratorpolys
     , numeratordiffs
@@ -12,11 +14,13 @@ module Blocks
     , denominator00
     , denominator
     , rhotoz
+    , rho
     ) where
 
 import SimplePoly
 import Numeric.AD
 import Data.List
+import Data.Maybe
 
 type RhoOrder = Integer
 
@@ -66,7 +70,60 @@ rho :: (Floating a) => a -> a
 rho z = z / (1 + sqrt (1 - z))^2
 
 --------------------------------------------------------------------------------
--- Numerator diff polynomials
+-- PART 1: Exact values
+--------------------------------------------------------------------------------
+
+hypgrecursion :: (Fractional a) => a -> a -> a -> a -> Integer -> a
+hypgrecursion a b c r n = let m = fromIntegral n in r * (a + m) * (b + m) / (c + m) / (m + 1)
+
+blockrecursion :: (Floating a) => a -> a -> a -> a -> a -> a -> a -> Integer -> a
+blockrecursion a b h r w1 w2 w3 n = w4
+    where w4 = ( r * r * w2 * (2 * h * (2*a + 2*b + nn - 1) - 4 * a * (b - nn + 2) + (nn-2) * (4*b + nn - 1))
+               + r * w3 * (2 * h * (2*a + 2*b - nn + 1) + 4 * a * (b + nn - 1) + (nn-1) * (4*b - nn + 2))
+               + r * r * r * w1 * (2 * h * (nn-2) + (nn-3) * (nn-2)) ) / nn / (nn + 2 * h - 1)
+          nn = fromIntegral n
+
+--------------------------------------------------------------------------------
+-- List of terms in the series expansion (internal)
+--------------------------------------------------------------------------------
+
+hypgtermlist :: (Fractional a) => a -> a -> a -> a -> [a]
+hypgtermlist a b c r = 1 : nestmap (\ m w -> w * hypgrecursion a b c r m) 1 [0..]
+
+-- Equivalent but slower and higher memory footprint
+-- hypgtermlist' :: (Fractional a) => a -> a -> a -> a -> [a]
+-- hypgtermlist' a b c r = 1 : zipWith (\ m w -> w * hypgrecursion a b c r m) [0..] (hypgtermlist' a b c r)
+
+blocktermlist00 :: (Floating a) => a -> a -> [a]
+blocktermlist00 h z = let r = rho z in (((4 * r) ** h) *) <$> hypgtermlist (1/2) h (h + 1/2) (r^2)
+
+blocktermlist :: (Floating a) => a -> a -> a -> a -> [a]
+blocktermlist a b h z = let r = rho z in nestmap3 (\m w1 w2 w3 -> blockrecursion a b h r w1 w2 w3 m) 0 0 ((4 * r) ** h) [1..]
+
+--------------------------------------------------------------------------------
+-- Get the actual value of a block
+--------------------------------------------------------------------------------
+
+evaluateterms :: (Eq a, Num a) => [a] -> a
+evaluateterms termlist = let partialsums = nestmap (+) 0 termlist
+                         in fst $ fromJust $ find (uncurry (==)) $ (zip <*> tail . tail) partialsums
+
+hypgval a b c r = evaluateterms $ hypgtermlist a b c r
+blockval00 h z = evaluateterms $ blocktermlist00 h z
+blockval a b h z = evaluateterms $ blocktermlist a b h z
+
+--------------------------------------------------------------------------------
+-- Compute z-derivatives at 1/2 using automatic differentiation (Numeric.AD)
+--------------------------------------------------------------------------------
+
+diffsblock00 :: (Eq a, Floating a) => a -> [a]
+diffsblock00 h = diffs (blockval00 (auto h)) (1/2)
+
+diffsblock :: (Eq a, Floating a) => a -> a -> a -> [a]
+diffsblock a b h = diffs (blockval (auto a) (auto b) (auto h)) (1/2)
+
+--------------------------------------------------------------------------------
+-- PART 2: Numerator diff polynomials
 --------------------------------------------------------------------------------
 
 numrecursion :: (Floating a) => a -> a -> a -> Integer -> Poly a -> Poly a -> Poly a -> Poly a

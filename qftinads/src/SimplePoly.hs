@@ -1,9 +1,13 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE FlexibleInstances #-}
 
 module SimplePoly
   ( Poly(CL)
+  , Algebra
+  , (.*)
   , getCL
   , constP
   , padtodeg
@@ -38,8 +42,17 @@ instance (Num a) => Num (Poly a) where
   signum = undefined
   abs = undefined
 
--- (*.) :: (Num a) => Poly a -> a -> Poly a
--- (*.) p x = p * constP x
+class (Num a, Num b) => Algebra a b where
+  (.*) :: a -> b -> b
+
+instance (Num a) => Algebra a (Poly a) where
+  (.*) x p = p * constP x
+
+instance (Num a) => Algebra a a where
+  (.*) = (*)
+
+-- (.*) :: (Num a) =>  a -> Poly a -> Poly a
+-- (.*) x p = p * constP x
 --
 -- (/.) :: (Floating a) => Poly a -> a -> Poly a
 -- (/.) p x = p * constP (recip x)
@@ -110,7 +123,7 @@ sampsToPoly ((arg,val):samps) = let valP = constP val
 
 -- if q = shiftpoly 3 p then q(x) = p(x+3), so if p(x) > 0 for x > 3 then q(x) > 0 for x > 0
 shiftPoly :: (Num a) => a -> Poly a -> Poly a
-shiftPoly y (CL p) = sum $ zipWith (\c m -> constP c * m) p [ (x + constP y)^n | n <- [0,1..] ]
+shiftPoly y (CL p) = sum $ zipWith (.*) p [ (x + constP y)^n | n <- [0,1..] ]
 
 -- if q = multarg 3 p then q(x) = p(3x)
 multarg :: (Num a) => a -> Poly a -> Poly a

@@ -6,7 +6,7 @@ module Main where
 
 import SimplePoly
 import Blocks
-import Functionals
+import FunctionalsZ2
 import Numeric.Rounded
 import Text.XML.Light
 import System.Environment
@@ -26,34 +26,34 @@ instance NFData PFloat where
 buildSdpFile :: Element -> IO ()
 buildSdpFile xml =
   case getLeaf "function" of
-    Just "feasibilitySDPSimple" ->
-      let
-        Just filename = getLeaf "filename"
-        Just h1in = read <$> getLeaf "h1" :: Maybe PFloat
-        Just gap = read <$> getLeaf "gap" :: Maybe PFloat
-        Just rhoOrder = read <$> getLeaf "rhoOrder" :: Maybe Integer
-        Just derOrder = read <$> getLeaf "derOrder" :: Maybe Int
-      in writeSDPtoFile filename $ feasibilitySDPSimple rhoOrder derOrder h1in gap
-    Just "maxOPESDPSimple" ->
-      let
-        Just filename = getLeaf "filename"
-        Just h1in = read <$> getLeaf "h1" :: Maybe PFloat
-        Just gap = read <$> getLeaf "gap" :: Maybe PFloat
-        Just hint = read <$> getLeaf "hint" :: Maybe PFloat
-        Just rhoOrder = read <$> getLeaf "rhoOrder" :: Maybe Integer
-        Just derOrder = read <$> getLeaf "derOrder" :: Maybe Int
-      in writeSDPtoFile filename $ maxOPESDPSimple rhoOrder derOrder h1in gap hint
-    Just "maxOPESDPFull113Even" ->
-      let
-        Just filename = getLeaf "filename"
-        Just h1in = read <$> getLeaf "h1" :: Maybe PFloat
-        Just h3in = read <$> getLeaf "h3" :: Maybe PFloat
-        Just ratin = read <$> getLeaf "rat" :: Maybe PFloat
-        Just evengapin = read <$> getLeaf "evengap" :: Maybe PFloat
-        Just oddgapin = read <$> getLeaf "oddgap" :: Maybe PFloat
-        Just rhoOrder = read <$> getLeaf "rhoOrder" :: Maybe Integer
-        Just derOrder = read <$> getLeaf "derOrder" :: Maybe Int
-      in writeSDPtoFile filename $ maxOPESDPFull113Even rhoOrder derOrder h1in h3in evengapin oddgapin ratin
+    -- Just "feasibilitySDPSimple" ->
+    --   let
+    --     Just filename = getLeaf "filename"
+    --     Just h1in = read <$> getLeaf "h1" :: Maybe PFloat
+    --     Just gap = read <$> getLeaf "gap" :: Maybe PFloat
+    --     Just rhoOrder = read <$> getLeaf "rhoOrder" :: Maybe Integer
+    --     Just derOrder = read <$> getLeaf "derOrder" :: Maybe Int
+    --   in writeSDPtoFile filename $ feasibilitySDPSimple rhoOrder derOrder h1in gap
+    -- Just "maxOPESDPSimple" ->
+    --   let
+    --     Just filename = getLeaf "filename"
+    --     Just h1in = read <$> getLeaf "h1" :: Maybe PFloat
+    --     Just gap = read <$> getLeaf "gap" :: Maybe PFloat
+    --     Just hint = read <$> getLeaf "hint" :: Maybe PFloat
+    --     Just rhoOrder = read <$> getLeaf "rhoOrder" :: Maybe Integer
+    --     Just derOrder = read <$> getLeaf "derOrder" :: Maybe Int
+    --   in writeSDPtoFile filename $ maxOPESDPSimple rhoOrder derOrder h1in gap hint
+    -- Just "maxOPESDPFull113Even" ->
+    --   let
+    --     Just filename = getLeaf "filename"
+    --     Just h1in = read <$> getLeaf "h1" :: Maybe PFloat
+    --     Just h3in = read <$> getLeaf "h3" :: Maybe PFloat
+    --     Just ratin = read <$> getLeaf "rat" :: Maybe PFloat
+    --     Just evengapin = read <$> getLeaf "evengap" :: Maybe PFloat
+    --     Just oddgapin = read <$> getLeaf "oddgap" :: Maybe PFloat
+    --     Just rhoOrder = read <$> getLeaf "rhoOrder" :: Maybe Integer
+    --     Just derOrder = read <$> getLeaf "derOrder" :: Maybe Int
+    --   in writeSDPtoFile filename $ maxOPESDPFull113Even rhoOrder derOrder h1in h3in evengapin oddgapin ratin
     Just "maxOPESDPFull113Z2" ->
       let
         Just filename = getLeaf "filename"

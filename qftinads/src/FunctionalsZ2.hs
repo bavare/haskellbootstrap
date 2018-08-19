@@ -87,17 +87,21 @@ rescalefact :: (Floating a, Algebra a b) => a -> [b] -> [b]
 rescalefact x = zipWith (.*) (scanl (/) x (fromInteger <$> [1..]))
 
 diffslist :: (Floating a) => a -> [a]
-diffslist h = diffs (\x -> (1-x) ** (2 * auto h)) (1/2)
+diffslist htot = diffs (\x -> (1-x) ** auto htot) (1/2)
 
 crossingeqndersSimpleEqn :: (Eq a, Floating a) => a -> RhoOrder -> a -> Crossingeqnders a
 -- s is overall rescaling
 crossingeqndersSimpleEqn h1 n s =
   Crossingeqnders
   { pref = shortPrefactor n
-  , polys = onlyOdds $ rescalefact s $ productrule (diffslist h1) (numeratorpolys00 n)
-  , idty = onlyOdds $ rescalefact s $ productrule (diffslist h1) (1 : repeat 0)
-  , at = diffsblock00
+  , polys = parseP (numeratorpolys00 n)
+  , idty = parseN (1 : repeat 0)
+  -- , idty = onlyOdds . rescalefact s . productrule (diffslist (2 * h1)) $ (1 : repeat 0)
+  , at = parseN . diffsblock00
   }
+  where
+    parseP = onlyOdds . rescalefact s . productrule (diffslist (2 * h1))
+    parseN = onlyOdds . rescalefact s . productrule (diffslist (2 * h1))
 
 crossingeqndersEqn1 :: (Eq a, Floating a) => a -> a -> RhoOrder -> Crossingeqnders a
 crossingeqndersEqn1 h1 _ n = crossingeqndersSimpleEqn h1 n 2
@@ -109,30 +113,38 @@ crossingeqndersEqn6LHS :: (Eq a, Floating a) => a -> a -> RhoOrder -> Crossingeq
 crossingeqndersEqn6LHS h1 h3 n =
   Crossingeqnders
   { pref = shortPrefactor n
-  , polys = rescalefact (1/2 `withTypeOf` h1) $ productrule (diffslist (h1 + h3)) (numeratorpolys00 n)
-  , idty = rescalefact (1/2 `withTypeOf` h1) $ productrule (diffslist (h1 + h3)) (1 : repeat 0)
-  , at = diffsblock00
+  , polys = parseP (numeratorpolys00 n)
+  , idty = parseN (1 : repeat 0)
+  , at = parseN . diffsblock00
   }
+  where
+    parseP = rescalefact (1/2 `withTypeOf` h1) . productrule (diffslist (h1 + h3))
+    parseN = rescalefact (1/2 `withTypeOf` h1) . productrule (diffslist (h1 + h3))
 
 crossingeqndersEqn6RHS :: (Eq a, Floating a) => a -> a -> RhoOrder -> Crossingeqnders a
 crossingeqndersEqn6RHS h1 h3 n =
   Crossingeqnders
   { pref = longPrefactor n
-  , polys = signAlternate $ rescalefact (-1 `withTypeOf` h1) $
-              productrule (diffslist (2 * h3)) (numeratorpolys (h3 - h1) (h3 - h1) n)
+  , polys = parseP (numeratorpolys (h3 - h1) (h3 - h1) n)
   , idty = undefined
-  , at = diffsblock (h3 - h1) (h3 - h1)
+  , at = parseN . diffsblock (h3 - h1) (h3 - h1)
   }
+  where
+    parseP = signAlternate . rescalefact (-1 `withTypeOf` h1) . productrule (diffslist (2 * h3))
+    parseN = signAlternate . rescalefact (-1 `withTypeOf` h1) . productrule (diffslist (2 * h3))
+
 
 crossingeqndersEqn5 :: (Eq a, Floating a) => a -> a -> RhoOrder -> Crossingeqnders a
 crossingeqndersEqn5 h1 h3 n =
   Crossingeqnders
   { pref = longPrefactor n
-  , polys = onlyOdds $ rescalefact (2 `withTypeOf` h1) $
-              productrule (diffslist (h1 + h3)) (numeratorpolys (h1 - h3) (h3 - h1) n)
+  , polys = parseP (numeratorpolys (h1 - h3) (h3 - h1) n)
   , idty = undefined
-  , at = diffsblock (h1 - h3) (h3 - h1)
+  , at = parseN . diffsblock (h1 - h3) (h3 - h1)
   }
+  where
+    parseP = onlyOdds . rescalefact (2 `withTypeOf` h1) . productrule (diffslist (h1 + h3))
+    parseN = onlyOdds . rescalefact (2 `withTypeOf` h1) . productrule (diffslist (h1 + h3))
 
 shiftpolys gap pvm = PolyVectorMatrix { els = (map . map . map) (shiftPoly gap) (els pvm) }
 normalizepolys normvec pvm = PolyVectorMatrix { els = (map . map) (normalizewith normvec) (els pvm) }
@@ -160,7 +172,7 @@ combinecrossingeqnders n nd h1 h3 rat gapPpZp gapPpZm gapPmZm =
     , obj = zipWith3 (\x y z -> x + 2 * y + z) identity1 identity6 identity2
   }
   where
-    [nd1, nd2, nd5, nd6] = [nd, nd, nd, nd]
+    [nd1, nd2, nd5, nd6] = [nd, nd, nd, nd `quot` 2]
     tovec1 x = take nd1 x ++ replicate (nd2 + nd5 + nd6) 0
     tovec2 x = replicate nd1 0 ++ take nd2 x ++ replicate (nd5 + nd6) 0
     tovec5 x = replicate (nd1 + nd2) 0 ++ take nd5 x ++ replicate nd6 0
@@ -171,11 +183,11 @@ combinecrossingeqnders n nd h1 h3 rat gapPpZp gapPpZm gapPmZm =
     polys6LHS = tovec6 $ polys $ crossingeqndersEqn6LHS h1 h3 n
     polys6RHS = tovec6 $ polys $ crossingeqndersEqn6RHS h1 h3 n
     identity1 = tovec1 $ idty $ crossingeqndersEqn1 h1 h3 n
-    identity2 = tovec1 $ idty $ crossingeqndersEqn1 h1 h3 n
+    identity2 = tovec2 $ idty $ crossingeqndersEqn2 h1 h3 n
     identity6 = tovec6 $ idty $ crossingeqndersEqn6LHS h1 h3 n
     norm1 = tovec1 $ crossingeqndersEqn1 h1 h3 n `at` h3
-    norm2 = tovec2 $ crossingeqndersEqn1 h1 h3 n `at` h3
-    norm5 = tovec5 $ crossingeqndersEqn1 h1 h3 n `at` h1
+    norm2 = tovec2 $ crossingeqndersEqn2 h1 h3 n `at` h3
+    norm5 = tovec5 $ crossingeqndersEqn5 h1 h3 n `at` h1
     norm6LHS = tovec6 $ crossingeqndersEqn6LHS h1 h3 n `at` h3
     norm6RHS = tovec6 $ crossingeqndersEqn6RHS h1 h3 n `at` h1
 
@@ -209,7 +221,7 @@ normalize fnels  = SDP { pvms = normalizepolys (norm fnels) <$> constraints fnel
                        }
 
 maxOPESDPFull113Z2 :: (Ord a, Floating a) => RhoOrder -> Int -> a -> a -> a -> a -> a -> a -> SDP a
-maxOPESDPFull113Z2 n nd h1 h3 rat gapPpZp gapPpZm gapPmZm =
+maxOPESDPFull113Z2 n nd h1 h3 gapPpZp gapPpZm gapPmZm rat =
   normalize $ combinecrossingeqnders n nd h1 h3 rat gapPpZp gapPpZm gapPmZm
 
 writeSDPtoFile :: (Floating a, Show a) => FilePath -> SDP a -> IO ()

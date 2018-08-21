@@ -89,62 +89,56 @@ rescalefact x = zipWith (.*) (scanl (/) x (fromInteger <$> [1..]))
 diffslist :: (Floating a) => a -> [a]
 diffslist htot = diffs (\x -> (1-x) ** auto htot) (1/2)
 
-crossingeqndersSimpleEqn :: (Eq a, Floating a) => a -> RhoOrder -> a -> Crossingeqnders a
+crossingeqndersSimpleEqn :: (Eq a, Floating a) => a -> [Poly a] -> a -> Crossingeqnders a
 -- s is overall rescaling
-crossingeqndersSimpleEqn h1 n s =
+crossingeqndersSimpleEqn h1 nums s =
   Crossingeqnders
-  { pref = shortPrefactor n
-  , polys = parseP (numeratorpolys00 n)
-  , idty = parseN (1 : repeat 0)
-  -- , idty = onlyOdds . rescalefact s . productrule (diffslist (2 * h1)) $ (1 : repeat 0)
-  , at = parseN . diffsblock00
+  { pref = undefined -- shortPrefactor n
+  , polys = onlyOdds . rescalefact s . productrule dl $ nums
+  , idty = onlyOdds . rescalefact s . productrule dl $ (1 : repeat 0)
+  , at = onlyOdds . rescalefact s . productrule dl . diffsblock00
   }
   where
-    parseP = onlyOdds . rescalefact s . productrule (diffslist (2 * h1))
-    parseN = onlyOdds . rescalefact s . productrule (diffslist (2 * h1))
+    dl = diffslist (2 * h1)
 
-crossingeqndersEqn1 :: (Eq a, Floating a) => a -> a -> RhoOrder -> Crossingeqnders a
-crossingeqndersEqn1 h1 _ n = crossingeqndersSimpleEqn h1 n 2
+crossingeqndersEqn1 :: (Eq a, Floating a) => a -> a -> [Poly a] -> Crossingeqnders a
+crossingeqndersEqn1 h1 _ nums = crossingeqndersSimpleEqn h1 nums 2
 
-crossingeqndersEqn2 :: (Eq a, Floating a) => a -> a -> RhoOrder -> Crossingeqnders a
-crossingeqndersEqn2 _ h3 n = crossingeqndersSimpleEqn h3 n 2
+crossingeqndersEqn2 :: (Eq a, Floating a) => a -> a -> [Poly a] -> Crossingeqnders a
+crossingeqndersEqn2 _ h3 nums = crossingeqndersSimpleEqn h3 nums 2
 
-crossingeqndersEqn6LHS :: (Eq a, Floating a) => a -> a -> RhoOrder -> Crossingeqnders a
-crossingeqndersEqn6LHS h1 h3 n =
+crossingeqndersEqn6LHS :: (Eq a, Floating a) => a -> a -> [Poly a] -> Crossingeqnders a
+crossingeqndersEqn6LHS h1 h3 nums =
   Crossingeqnders
-  { pref = shortPrefactor n
-  , polys = parseP (numeratorpolys00 n)
-  , idty = parseN (1 : repeat 0)
-  , at = parseN . diffsblock00
+  { pref = undefined -- shortPrefactor n
+  , polys = rescalefact (1/2 `withTypeOf` h1) . productrule dl $ nums
+  , idty = rescalefact (1/2 `withTypeOf` h1) . productrule dl $ (1 : repeat 0)
+  , at = rescalefact (1/2 `withTypeOf` h1) . productrule dl . diffsblock00
   }
   where
-    parseP = rescalefact (1/2 `withTypeOf` h1) . productrule (diffslist (h1 + h3))
-    parseN = rescalefact (1/2 `withTypeOf` h1) . productrule (diffslist (h1 + h3))
+    dl = diffslist (h1 + h3)
 
 crossingeqndersEqn6RHS :: (Eq a, Floating a) => a -> a -> RhoOrder -> Crossingeqnders a
 crossingeqndersEqn6RHS h1 h3 n =
   Crossingeqnders
-  { pref = longPrefactor n
-  , polys = parseP (numeratorpolys (h3 - h1) (h3 - h1) n)
+  { pref = undefined -- longPrefactor n
+  , polys = signAlternate . rescalefact (-1 `withTypeOf` h1) . productrule dl $ numeratorpolys (h3 - h1) (h3 - h1) n
   , idty = undefined
-  , at = parseN . diffsblock (h3 - h1) (h3 - h1)
+  , at = signAlternate . rescalefact (-1 `withTypeOf` h1) . productrule dl . diffsblock (h3 - h1) (h3 - h1)
   }
   where
-    parseP = signAlternate . rescalefact (-1 `withTypeOf` h1) . productrule (diffslist (2 * h3))
-    parseN = signAlternate . rescalefact (-1 `withTypeOf` h1) . productrule (diffslist (2 * h3))
-
+    dl = diffslist (2 * h3)
 
 crossingeqndersEqn5 :: (Eq a, Floating a) => a -> a -> RhoOrder -> Crossingeqnders a
 crossingeqndersEqn5 h1 h3 n =
   Crossingeqnders
-  { pref = longPrefactor n
-  , polys = parseP (numeratorpolys (h1 - h3) (h3 - h1) n)
+  { pref = undefined -- longPrefactor n
+  , polys = onlyOdds . rescalefact (2 `withTypeOf` h1) . productrule dl $ numeratorpolys (h1 - h3) (h3 - h1) n
   , idty = undefined
-  , at = parseN . diffsblock (h1 - h3) (h3 - h1)
+  , at = onlyOdds . rescalefact (2 `withTypeOf` h1) . productrule dl . diffsblock (h1 - h3) (h3 - h1)
   }
   where
-    parseP = onlyOdds . rescalefact (2 `withTypeOf` h1) . productrule (diffslist (h1 + h3))
-    parseN = onlyOdds . rescalefact (2 `withTypeOf` h1) . productrule (diffslist (h1 + h3))
+    dl = diffslist (h1 + h3)
 
 shiftpolys gap pvm = PolyVectorMatrix { els = (map . map . map) (shiftPoly gap) (els pvm) }
 normalizepolys normvec pvm = PolyVectorMatrix { els = (map . map) (normalizewith normvec) (els pvm) }
@@ -177,20 +171,25 @@ combinecrossingeqnders n nd h1 h3 rat gapPpZp gapPpZm gapPmZm =
     tovec2 x = replicate nd1 0 ++ take nd2 x ++ replicate (nd5 + nd6) 0
     tovec5 x = replicate (nd1 + nd2) 0 ++ take nd5 x ++ replicate nd6 0
     tovec6 x = replicate (nd1 + nd2 + nd5) 0 ++ take nd6 x
-    polys1 = tovec1 $ polys $ crossingeqndersEqn1 h1 h3 n
-    polys2 = tovec2 $ polys $ crossingeqndersEqn2 h1 h3 n
-    polys5 = tovec5 $ polys $ crossingeqndersEqn5 h1 h3 n
-    polys6LHS = tovec6 $ polys $ crossingeqndersEqn6LHS h1 h3 n
-    polys6RHS = tovec6 $ polys $ crossingeqndersEqn6RHS h1 h3 n
-    identity1 = tovec1 $ idty $ crossingeqndersEqn1 h1 h3 n
-    identity2 = tovec2 $ idty $ crossingeqndersEqn2 h1 h3 n
-    identity6 = tovec6 $ idty $ crossingeqndersEqn6LHS h1 h3 n
-    norm1 = tovec1 $ crossingeqndersEqn1 h1 h3 n `at` h3
-    norm2 = tovec2 $ crossingeqndersEqn2 h1 h3 n `at` h3
-    norm5 = tovec5 $ crossingeqndersEqn5 h1 h3 n `at` h1
-    norm6LHS = tovec6 $ crossingeqndersEqn6LHS h1 h3 n `at` h3
-    norm6RHS = tovec6 $ crossingeqndersEqn6RHS h1 h3 n `at` h1
-
+    polys1 = tovec1 $ polys ceqndsEqn1
+    polys2 = tovec2 $ polys ceqndsEqn2
+    polys5 = tovec5 $ polys ceqndsEqn5
+    polys6LHS = tovec6 $ polys ceqndsEqn6LHS
+    polys6RHS = tovec6 $ polys ceqndsEqn6RHS
+    identity1 = tovec1 $ idty ceqndsEqn1
+    identity2 = tovec2 $ idty ceqndsEqn2
+    identity6 = tovec6 $ idty ceqndsEqn6LHS
+    norm1 = tovec1 $ ceqndsEqn1 `at` h3
+    norm2 = tovec2 $ ceqndsEqn2 `at` h3
+    norm5 = tovec5 $ ceqndsEqn5 `at` h1
+    norm6LHS = tovec6 $ ceqndsEqn6LHS `at` h3
+    norm6RHS = tovec6 $ ceqndsEqn6RHS `at` h1
+    nums00 = numeratorpolys00 n
+    ceqndsEqn1 = crossingeqndersEqn1 h1 h3 nums00
+    ceqndsEqn2 = crossingeqndersEqn2 h1 h3 nums00
+    ceqndsEqn5 = crossingeqndersEqn5 h1 h3 n
+    ceqndsEqn6LHS = crossingeqndersEqn6LHS h1 h3 nums00
+    ceqndsEqn6RHS = crossingeqndersEqn6RHS h1 h3 n
 
 -------------------------------------------------------------------------------
 -- Auxiliary functions for deriving crossing equations

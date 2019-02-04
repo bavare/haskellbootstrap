@@ -4,6 +4,8 @@ module Blocks
     -- , blockval
     -- ,
     RhoOrder
+    , diffsblockapprox00
+    , diffsblockapprox
     , diffsblock00
     , diffsblock
     , numeratorpolys00
@@ -11,13 +13,17 @@ module Blocks
     , numeratordiffs
     , prefactordiffs
     , numeratordiffs00
-    , denominator00
-    , denominator
+    , dampedRational00
+    , dampedRational
+    , denominator -- legacy
+    , denominator00 -- legacy
+    -- , denominator'
     , rhotoz
     , rho
     ) where
 
 import SimplePoly
+import PolyVectorMatrix
 import Numeric.AD
 import Data.List
 import Data.Maybe
@@ -111,6 +117,8 @@ evaluateterms termlist = let partialsums = nestmap (+) 0 termlist
 hypgval a b c r = evaluateterms $ hypgtermlist a b c r
 blockval00 h z = evaluateterms $ blocktermlist00 h z
 blockval a b h z = evaluateterms $ blocktermlist a b h z
+blockvalapprox00 h z n = sum $ take (fromInteger n) $ blocktermlist00 h z
+blockvalapprox a b h z n = sum $ take (fromInteger n) $ blocktermlist a b h z
 
 --------------------------------------------------------------------------------
 -- Compute z-derivatives at 1/2 using automatic differentiation (Numeric.AD)
@@ -119,8 +127,12 @@ blockval a b h z = evaluateterms $ blocktermlist a b h z
 diffsblock00 :: (Eq a, Floating a) => a -> [a]
 diffsblock00 h = diffs (blockval00 (auto h)) (1/2)
 
+diffsblockapprox00 h n = diffs (\z -> blockvalapprox00 (auto h) z (auto n)) (1/2)
+
 diffsblock :: (Eq a, Floating a) => a -> a -> a -> [a]
 diffsblock a b h = diffs (blockval (auto a) (auto b) (auto h)) (1/2)
+
+diffsblockapprox a b h n = diffs (\z -> blockvalapprox (auto a) (auto b) (auto h) z (auto n)) (1/2)
 
 --------------------------------------------------------------------------------
 -- PART 2: Numerator diff polynomials
@@ -240,3 +252,18 @@ denominator00 n h = (4 * r) ** (-h) * poles
                     where
                       r = rho (1/2)
                       poles = pochhammer (1/2 + h) (n `quot` 2)
+
+dampedRational00 :: Floating a => RhoOrder -> DampedRational a
+dampedRational00 n = DampedRational { coeff = 1
+                                    , poles = [ - fromIntegral x - 1/2| x <- [0..(n `quot` 2)-1] ]
+                                    , expo = 4 * rho (1/2)
+                                    }
+
+dampedRational :: Floating a => RhoOrder -> DampedRational a
+dampedRational n = DampedRational { coeff = 1 / 2 ^ n
+                                  , poles = [ - fromIntegral x / 2| x <- [0..n-1] ]
+                                  , expo = 4 * rho (1/2)
+                                  }
+
+denominator' :: Floating a => DampedRational a -> a -> a
+denominator' p h = 1 / evaldr p h

@@ -54,6 +54,15 @@ buildSdpFile xml =
     --     Just rhoOrder = read <$> getLeaf "rhoOrder" :: Maybe Integer
     --     Just derOrder = read <$> getLeaf "derOrder" :: Maybe Int
     --   in writeSDPtoFile filename $ maxOPESDPFull113Even rhoOrder derOrder h1in h3in evengapin oddgapin ratin
+    Just "maxOPESDPSingle" ->
+      let
+        Just filename = getLeaf "filename"
+        Just h1 = read <$> getLeaf "h1" :: Maybe PFloat
+        Just h3 = read <$> getLeaf "h3" :: Maybe PFloat
+        Just gap = read <$> getLeaf "gap" :: Maybe PFloat
+        Just rhoOrder = read <$> getLeaf "rhoOrder" :: Maybe Integer
+        Just derOrder = read <$> getLeaf "derOrder" :: Maybe Int
+        in writeSDPtoFile filename $ maxOPESDPSingle rhoOrder derOrder h1 h3 gap
     Just "maxOPESDPFull113Z2" ->
       let
         Just filename = getLeaf "filename"

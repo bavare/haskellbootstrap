@@ -3,11 +3,12 @@
 module WriteXMLSDP ( writeXMLSDPtoFile ) where
 
 import SimplePoly
+import PolyVectorMatrix
 import Control.DeepSeq
 import Control.Monad.Reader
 
 type PolyVector a = [Poly a]
-type PolyVectorMatrix a = [[PolyVector a]]
+-- type PolyVectorMatrix a = [[PolyVector a]]
 type Outputter = ReaderT FilePath IO ()
 
 writefn :: String -> Outputter
@@ -32,31 +33,32 @@ writeXMLpoly p = mapM_ (writeXML "coeff" . writeXMLnum) $ getCL p
 writeXMLpolyVector :: Show a => PolyVector a -> Outputter
 writeXMLpolyVector = mapM_ $ writeXML "polynomial" . writeXMLpoly
 
-writeXMLpolyVectorMatrix :: (Floating a, Show a) => PolyVectorMatrix a -> Outputter
+writeXMLpolyVectorMatrix :: (Ord a, Floating a, Show a) => PolyVectorMatrix a -> Outputter
 writeXMLpolyVectorMatrix pvm =
-    do { writeXML "rows" $ writeXMLnum $ length pvm
-       ; writeXML "cols" $ writeXMLnum $ length $ head pvm
+    do { writeXML "rows" $ writeXMLnum $ length polys
+       ; writeXML "cols" $ writeXMLnum $ length $ head polys
        ; writeXML "elements" $
-            mapM_ (writeXML "polynomialVector" . writeXMLpolyVector) (concat pvm)
-       ; writeXML "samplePoints" $ writeXMLvec samplePoints
-       ; writeXML "sampleScalings" $ writeXMLvec sampleScalings
+            mapM_ (writeXML "polynomialVector" . writeXMLpolyVector) (concat polys)
+       ; writeXML "samplePoints" $ writeXMLvec sPoints
+       ; writeXML "sampleScalings" $ writeXMLvec sScalings
        ; writeXML "bilinearBasis" $ writeXMLpolyVector bilinearBasis }
     where
-      x = head $ getCL $ head $ head $ head pvm
-      maxDeg = maximum $ deg <$> concat (concat pvm)
-      bilinearBasis = take ((maxDeg `quot` 2) + 1) rescaledlaguerrePolys `withTypeOf` [CL [x]]
-      samplePoints = laguerreSamplePts (maxDeg + 1) `withTypeOf` [x]
-      -- sampleScalings = laguerreSampleScals (maxDeg + 1) `withTypeOf` [x]
-      sampleScalings = naturalSampleScals bilinearBasis samplePoints `withTypeOf` [x]
+      x = head $ getCL $ head $ head $ head polys
+      maxDeg = maximum $ deg <$> concat (concat polys)
+      dr = pvmpref pvm
+      polys = pvmpolys pvm
+      sPoints = samplePoints dr (maxDeg + 1)
+      sScalings = evaldr dr <$> sPoints
+      bilinearBasis = take ((maxDeg `quot` 2) + 1) (orthonormalpolysfromdr dr)
 
-writeXMLSDP :: (Floating a, Show a) => [a] -> [PolyVectorMatrix a] -> Outputter
+writeXMLSDP :: (Ord a, Floating a, Show a) => [a] -> [PolyVectorMatrix a] -> Outputter
 writeXMLSDP optvec pvms =
         writeXML "sdp" $
             do { writeXML "objective" $ writeXMLvec optvec
                ; writeXML "polynomialVectorMatrices" $
                     mapM_ (writeXML "polynomialVectorMatrix" . writeXMLpolyVectorMatrix) pvms }
 
-writeXMLSDPtoFile :: (Floating a, Show a) => FilePath -> [a] -> [PolyVectorMatrix a] -> IO ()
+writeXMLSDPtoFile :: (Ord a, Floating a, Show a) => FilePath -> [a] -> [PolyVectorMatrix a] -> IO ()
 writeXMLSDPtoFile fp optvec pvms =
   do
     writeFile fp ""
@@ -86,10 +88,6 @@ laguerrerecursion !k !p !q = ( (2 * kk + 1 - x) * q - kk * p) * den
 
 rescaledlaguerrePolys :: (Floating a) => [Poly a]
 rescaledlaguerrePolys = multarg 2 <$> laguerrePolys
-
-laguerreSamplePts :: Floating a => Int -> [a]
-laguerreSamplePts n = (\k -> pi^2 * (4 * fi k - 1)^2 / (64 * fi n)) <$> [0..(n-1)]
-  where fi = fromIntegral
 
 -- laguerreSampleScals :: Floating a => Int -> [a]
 -- laguerreSampleScals n = exp . negate <$> laguerreSamplePts n

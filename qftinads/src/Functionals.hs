@@ -5,8 +5,9 @@
 {-# LANGUAGE BangPatterns #-}
 
 module Functionals
- ( writeSDPtoFile
- , maxOPESDPSimple
+ ( maxOPESDPSimple
+ -- defunct
+ -- , writeSDPtoFile
  , feasibilitySDPSimple
  , maxOPESDPFull113Even
  , maxOPESDPFull113Z2
@@ -444,5 +445,5 @@ maxOPESDPFull113Z2 rhoOrder derOrder h1 h3 gapPevenZeven gapPevenZodd gapPoddZod
     doNormVec = normalize id normvec
     normvec = singleParticlesOptEven fn rat
 
-writeSDPtoFile :: (Floating a, Show a) => FilePath -> SDP a -> IO ()
-writeSDPtoFile fp sdp = writeXMLSDPtoFile fp (optvec sdp) (getEls <$> pvms sdp)
+-- writeSDPtoFile :: (Floating a, Show a) => FilePath -> SDP a -> IO ()
+-- writeSDPtoFile fp sdp = writeXMLSDPtoFile fp (optvec sdp) (getEls <$> pvms sdp)

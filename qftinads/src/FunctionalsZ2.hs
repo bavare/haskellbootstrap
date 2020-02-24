@@ -9,6 +9,7 @@ module FunctionalsZ2
      ( writeSDPtoFile
      , maxOPESDPFull113Z2
      , maxOPESDPSingle
+     , feasibilitySDPSingle
      )
  where
 
@@ -252,6 +253,29 @@ singlecrossingeqnders n nd h1 h3 gap =
   where
     ceqndsEqn1 = crossingeqndersEqn1 h1 h3 n
 
+
+singlecrossingeqnders0opt :: Floating a => RhoOrder -> Int -> a -> a -> a -> FunctionalEls a
+singlecrossingeqnders0opt n nd h1 h3 gap =
+  FunctionalEls
+  { constraints =
+      [ shift gap
+        PolyVectorMatrix {
+          pvmpref = pref ceqndsEqn1
+        , pvmpolys = [[ take nd $ polys ceqndsEqn1 ]]
+        }
+        ,
+        PolyVectorMatrix {
+          -- simple prefactor, used only to get non-trivial bilinearBasis
+          pvmpref = dampedRational00 2
+        , pvmpolys = [[ take nd $ constP <$> idty ceqndsEqn1 ]]
+        }
+      ]
+    , norm = take nd $ ceqndsEqn1 `at` h3
+    , obj = replicate nd 0
+  }
+  where
+    ceqndsEqn1 = crossingeqndersEqn1 h1 h3 n
+
 -------------------------------------------------------------------------------
 -- Auxiliary functions for deriving crossing equations
 -------------------------------------------------------------------------------
@@ -287,6 +311,10 @@ maxOPESDPFull113Z2 nPs nd h1 h3 gapPpZp gapPpZm gapPmZm rat =
 maxOPESDPSingle :: (Ord a, Floating a) => RhoOrder -> Int -> a -> a -> a -> SDP a
 maxOPESDPSingle nPs nd h1 h3 gap =
   normalize $ singlecrossingeqnders nPs nd h1 h3 gap
+
+feasibilitySDPSingle :: (Ord a, Floating a) => RhoOrder -> Int -> a -> a -> a -> SDP a
+feasibilitySDPSingle nPs nd h1 h3 gap =
+  normalize $ singlecrossingeqnders0opt nPs nd h1 h3 gap
 
 writeSDPtoFile :: (Ord a, Floating a, Show a) => FilePath -> SDP a -> IO ()
 writeSDPtoFile fp sdp = writeXMLSDPtoFile fp (optvec sdp) (pvms sdp)

@@ -63,11 +63,6 @@ binomialstab :: Num a => [[a]]
 binomialstab = binomialsrows $ map fromInteger [1,1..]
   where binomialsrows r = r : binomialsrows (nestmap (+) 0 r)
 
-crossdiagonalsums :: Num a => [[a]] -> [a]
-crossdiagonalsums (x:xs) =
-  zipWith (+) (x ++ take (length xs) (map fromInteger [0,0..])) (0:crossdiagonalsums xs)
-crossdiagonalsums [] = map fromInteger [0,0..]
-
 functionalFns :: (Floating a) => a -> a -> RhoOrder -> InfiniteFunctionalFns a
 functionalFns h1 h3 n =
   Functional

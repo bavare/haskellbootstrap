@@ -11,6 +11,7 @@ module FunctionalsZ2
      , maxOPESDPSingle
      , feasibilitySDPSingle
      , feasibilitySDPFull113Z2
+     , feasibilitySDPFull113Z2fixedOPE
      )
  where
 
@@ -80,10 +81,10 @@ binomialstab :: Num a => [[a]]
 binomialstab = binomialsrows $ map fromInteger [1,1..]
   where binomialsrows r = r : binomialsrows (nestmap (+) 0 r)
 
-crossdiagonalsums :: Num a => [[a]] -> [a]
-crossdiagonalsums (x:xs) =
-  zipWith (+) (x ++ take (length xs) (map fromInteger [0,0..])) (0:crossdiagonalsums xs)
-crossdiagonalsums [] = map fromInteger [0,0..]
+-- crossdiagonalsums :: Num a => [[a]] -> [a]
+-- crossdiagonalsums (x:xs) =
+--   zipWith (+) (x ++ take (length xs) (map fromInteger [0,0..])) (0:crossdiagonalsums xs)
+-- crossdiagonalsums [] = map fromInteger [0,0..]
 
 onlyOdds :: [a] -> [a]
 onlyOdds (x:y:xs) = y : onlyOdds xs
@@ -294,6 +295,59 @@ combinecrossingeqnders0opt n nd h1 h3 rat gapPpZp gapPpZm gapPmZm =
     ceqndsEqn6RHS = crossingeqndersEqn6RHS h1 h3 n
 
 
+combinecrossingeqndersfixedOPE0opt :: Floating a => RhoOrder -> Int -> a -> a -> a -> a -> a -> a -> a -> a -> FunctionalEls a
+combinecrossingeqndersfixedOPE0opt n nd h1 h3 g113sq g113g333 g333sq gapPpZp gapPpZm gapPmZm =
+  FunctionalEls
+  { constraints =
+      [ shift gapPpZp
+        PolyVectorMatrix {
+          pvmpref = pref ceqndsEqn1
+        , pvmpolys = [[ polys1    , polys6LHS ]
+                     ,[ polys6LHS , polys2    ]]
+        }
+      , shift gapPpZm
+        PolyVectorMatrix {
+          pvmpref = pref ceqndsEqn5
+        , pvmpolys = [[ zipWith (+) polys6RHS polys5 ]]
+        }
+      , shift gapPmZm
+        PolyVectorMatrix {
+          pvmpref = pref ceqndsEqn5
+        , pvmpolys = [[ zipWith (-) polys6RHS polys5 ]]
+        }
+      ]
+    , norm = zipWith (+) normope normid
+    , obj = replicate (nd1 + nd2 + nd5 + nd6) 0
+  }
+  where
+    normope = zipWith5 (\x y z u v -> g113sq * (x + y + z) + 2 * g113g333 * u + g333sq * v)
+                 norm6RHS norm5 norm1 norm6LHS norm2
+    normid = zipWith3 (\x y z -> x + 2 * y + z) identity1 identity6 identity2
+    [nd1, nd2, nd5, nd6] = [nd, nd, nd, 2 * nd]
+    tovec1 x = take nd1 x ++ replicate (nd2 + nd5 + nd6) 0
+    tovec2 x = replicate nd1 0 ++ take nd2 x ++ replicate (nd5 + nd6) 0
+    tovec5 x = replicate (nd1 + nd2) 0 ++ take nd5 x ++ replicate nd6 0
+    tovec6 x = replicate (nd1 + nd2 + nd5) 0 ++ take nd6 x
+    polys1 = tovec1 $ polys ceqndsEqn1
+    polys2 = tovec2 $ polys ceqndsEqn2
+    polys5 = tovec5 $ polys ceqndsEqn5
+    polys6LHS = tovec6 $ polys ceqndsEqn6LHS
+    polys6RHS = tovec6 $ polys ceqndsEqn6RHS
+    identity1 = tovec1 $ idty ceqndsEqn1
+    identity2 = tovec2 $ idty ceqndsEqn2
+    identity6 = tovec6 $ idty ceqndsEqn6LHS
+    norm1 = tovec1 $ ceqndsEqn1 `at` h3
+    norm2 = tovec2 $ ceqndsEqn2 `at` h3
+    norm5 = tovec5 $ ceqndsEqn5 `at` h1
+    norm6LHS = tovec6 $ ceqndsEqn6LHS `at` h3
+    norm6RHS = tovec6 $ ceqndsEqn6RHS `at` h1
+    ceqndsEqn1 = crossingeqndersEqn1 h1 h3 n
+    ceqndsEqn2 = crossingeqndersEqn2 h1 h3 n
+    ceqndsEqn5 = crossingeqndersEqn5 h1 h3 n
+    ceqndsEqn6LHS = crossingeqndersEqn6LHS h1 h3 n
+    ceqndsEqn6RHS = crossingeqndersEqn6RHS h1 h3 n
+
+
 singlecrossingeqnders :: Floating a => RhoOrder -> Int -> a -> a -> a -> FunctionalEls a
 singlecrossingeqnders n nd h1 h3 gap =
   FunctionalEls
@@ -376,6 +430,10 @@ feasibilitySDPSingle nPs nd h1 h3 gap =
 feasibilitySDPFull113Z2 :: (Ord a, Floating a) => RhoOrder -> Int -> a -> a -> a -> a -> a -> a -> SDP a
 feasibilitySDPFull113Z2 nPs nd h1 h3 gapPpZp gapPpZm gapPmZm rat =
   normalize $ combinecrossingeqnders0opt nPs nd h1 h3 rat gapPpZp gapPpZm gapPmZm
+
+feasibilitySDPFull113Z2fixedOPE :: (Ord a, Floating a) => RhoOrder -> Int -> a -> a -> a -> a -> a -> a -> a -> a -> SDP a
+feasibilitySDPFull113Z2fixedOPE nPs nd h1 h3 gapPpZp gapPpZm gapPmZm g113sq g113g333 g333sq =
+  normalize $ combinecrossingeqndersfixedOPE0opt nPs nd h1 h3 g113sq g113g333 g333sq gapPpZp gapPpZm gapPmZm
 
 writeSDPtoFile :: (Ord a, Floating a, Show a) => FilePath -> SDP a -> IO ()
 writeSDPtoFile fp sdp = writeXMLSDPtoFile fp (optvec sdp) (pvms sdp)

@@ -17,6 +17,7 @@ module SimplePoly
   , sampsToPoly
   , diffPoly
   , multarg
+  , crossdiagonalsums
   ) where
 
 import GHC.Generics (Generic)
@@ -90,10 +91,15 @@ add (CL []) p = p
 -- -- mult (CL ((!p):ps)) (CL ((!q):qs)) = CL ((p*q) : psqs) where psqs = getCL $ CL ((p *) <$> qs) + CL ps * CL (q:qs)
 -- mult _ _ = CL []
 
+-- crossdiagonalsums :: Num a => [[a]] -> [a]
+-- crossdiagonalsums (x:xs) =
+--   zipWith (+) (x ++ replicate (length xs) 0) (0:crossdiagonalsums xs)
+-- crossdiagonalsums [] = repeat 0
+
 crossdiagonalsums :: Num a => [[a]] -> [a]
-crossdiagonalsums (x:xs) =
-  zipWith (+) (x ++ replicate (length xs) 0) (0:crossdiagonalsums xs)
-crossdiagonalsums [] = repeat 0
+crossdiagonalsums (x:y:xs) =
+  head x : crossdiagonalsums (zipWith (+) (tail x ++ replicate (length xs + 1) 0) y : xs)
+crossdiagonalsums [x:xs] = x:xs
 
 mult :: (Num a) => Poly a -> Poly a -> Poly a
 mult (CL ps) (CL qs) = CL $ crossdiagonalsums [ [ p * q | !p <- ps ] | !q <- qs ]
@@ -122,8 +128,11 @@ sampsToPoly ((arg,val):samps) = let valP = constP val
                                     in valP + ( x - argP ) * sampsToPoly newsamps
 
 -- if q = shiftpoly 3 p then q(x) = p(x+3), so if p(x) > 0 for x > 3 then q(x) > 0 for x > 0
+-- shiftPoly :: (Num a) => a -> Poly a -> Poly a
+-- shiftPoly y (CL p) = sum $ zipWith (.*) p [ (x + constP y)^n | n <- [0,1..] ]
+
 shiftPoly :: (Num a) => a -> Poly a -> Poly a
-shiftPoly y (CL p) = sum $ zipWith (.*) p [ (x + constP y)^n | n <- [0,1..] ]
+shiftPoly y (CL p) = sum $ zipWith (.*) p $ iterate (* (x + constP y)) 1
 
 -- if q = multarg 3 p then q(x) = p(3x)
 multarg :: (Num a) => a -> Poly a -> Poly a

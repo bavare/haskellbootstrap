@@ -96,6 +96,20 @@ buildSdpFile xml =
         Just rhoOrder = read <$> getLeaf "rhoOrder" :: Maybe Integer
         Just derOrder = read <$> getLeaf "derOrder" :: Maybe Int
         in writeSDPtoFile filename $ feasibilitySDPFull113Z2 rhoOrder derOrder h1 h3 gapPevenZeven gapPevenZodd gapPoddZodd rat
+    Just "feasibilitySDPFull113Z2fixedOPE" ->
+        let
+          Just filename = getLeaf "filename"
+          Just h1 = read <$> getLeaf "h1" :: Maybe PFloat
+          Just h3 = read <$> getLeaf "h3" :: Maybe PFloat
+          Just g113sq = read <$> getLeaf "g113sq" :: Maybe PFloat
+          Just g113g333 = read <$> getLeaf "g113g333" :: Maybe PFloat
+          Just g333sq = read <$> getLeaf "g333sq" :: Maybe PFloat
+          Just gapPevenZeven = read <$> getLeaf "pevenzevengap" :: Maybe PFloat
+          Just gapPevenZodd = read <$> getLeaf "pevenzoddgap" :: Maybe PFloat
+          Just gapPoddZodd = read <$> getLeaf "poddzoddgap" :: Maybe PFloat
+          Just rhoOrder = read <$> getLeaf "rhoOrder" :: Maybe Integer
+          Just derOrder = read <$> getLeaf "derOrder" :: Maybe Int
+        in writeSDPtoFile filename $ feasibilitySDPFull113Z2fixedOPE rhoOrder derOrder h1 h3 gapPevenZeven gapPevenZodd gapPoddZodd g113sq g113g333 g333sq
     Just _                      -> putStrLn "Error: Function not recognized"
     Nothing                     -> putStrLn "Error: No function specified"
   where

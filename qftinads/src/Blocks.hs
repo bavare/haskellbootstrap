@@ -42,11 +42,6 @@ nestmap3 :: (a -> b -> b -> b -> b) -> b -> b -> b -> [a] -> [b]
 nestmap3 _ _ _ _ [] = []
 nestmap3 f x y z (n:ns) = let w = f n x y z in z : nestmap3 f y z w ns
 
-crossdiagonalsums :: Num a => [[a]] -> [a]
-crossdiagonalsums (x:xs) =
-  zipWith (+) (x ++ take (length xs) (map fromInteger [0,0..])) (0:crossdiagonalsums xs)
-crossdiagonalsums [] = map fromInteger [0,0..]
-
 binomialstab :: Num a => [[a]]
 binomialstab = binomialsrows $ map fromInteger [1,1..]
   where binomialsrows r = r : binomialsrows (nestmap (+) 0 r)
